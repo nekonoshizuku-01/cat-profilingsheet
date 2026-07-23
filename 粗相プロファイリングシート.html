@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:sans-serif;background:#fff;color:#111}
+#app{max-width:680px;padding:1.5rem 0;margin:0 auto}
+.hd h1{font-size:19px;font-weight:600;margin-bottom:6px}
+.hd p{font-size:13.5px;color:#555;line-height:1.6;margin-bottom:1.1rem}
+.pw{background:#e8e8f0;border-radius:99px;height:6px;margin-bottom:4px}
+.pb{background:#534AB7;height:6px;border-radius:99px;transition:width .3s;width:0%}
+.pl{font-size:12px;color:#888;margin-bottom:1.4rem}
+.ch{display:flex;align-items:flex-start;gap:10px;padding:.7rem 1rem;background:#f4f4f8;border-radius:10px;border-left:3px solid #534AB7;margin-bottom:.9rem}
+.ci{font-size:17px;margin-top:1px}
+.ct{font-size:14.5px;font-weight:600;color:#111}
+.cd{font-size:12px;color:#666;margin-top:2px}
+.qc{background:#fff;border:1px solid #e0e0e8;border-radius:10px;padding:.8rem 1rem;margin-bottom:.5rem;display:flex;align-items:center;gap:10px}
+.qn{font-size:11px;color:#aaa;font-weight:600;min-width:26px;flex-shrink:0}
+.qt{font-size:13px;color:#222;line-height:1.55;flex:1}
+.yn{display:flex;gap:6px;flex-shrink:0}
+.yb,.nb{padding:6px 14px;font-size:13px;border-radius:99px;border:2px solid #bbb;background:#fff;color:#666;cursor:pointer;font-weight:500;font-family:sans-serif}
+.yb.on{background:#534AB7 !important;border-color:#534AB7 !important;color:#fff !important;font-weight:600}
+.nb.on{background:#444 !important;border-color:#444 !important;color:#fff !important;font-weight:600}
+.gap{height:1.4rem}
+.ar{display:flex;justify-content:flex-end;gap:10px;margin-top:1.5rem}
+.bm{padding:10px 22px;font-size:14px;font-weight:600;border:none;border-radius:8px;background:#534AB7;color:#fff;cursor:pointer}
+.bs{padding:10px 20px;font-size:14px;border:1px solid #ccc;border-radius:8px;background:#fff;color:#555;cursor:pointer;font-family:sans-serif}
+.warn{background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:10px 14px;font-size:13px;color:#856404;margin-top:1rem;display:none}
+.warn.show{display:block}
+.res{display:none;margin-top:2.5rem}
+.res.show{display:block}
+.res-title{font-size:19px;font-weight:600;margin-bottom:6px}
+.res-sub{font-size:13.5px;color:#555;margin-bottom:1.2rem}
+/* スコアカード */
+.rg{display:grid;grid-template-columns:repeat(auto-fit,minmax(118px,1fr));gap:8px;margin-bottom:2rem}
+.rc{border-radius:10px;padding:.85rem .7rem;text-align:center;cursor:pointer;transition:opacity .15s;border:2px solid transparent}
+.rc:hover{opacity:.85}
+.rc.active{border:2px solid #333}
+.rl{font-size:11px;margin-bottom:4px;font-weight:500}
+.rn{font-size:22px;font-weight:700}
+.rm{font-size:11px;margin-top:2px}
+.rs-label{font-size:12px;font-weight:600;margin-top:5px}
+.low{background:#e8f5e0}.low .rl,.low .rm,.low .rn,.low .rs-label{color:#2d6a0a}
+.mid{background:#fff3cd}.mid .rl,.mid .rm,.mid .rn,.mid .rs-label{color:#7a4f00}
+.hih{background:#fde8e8}.hih .rl,.hih .rm,.hih .rn,.hih .rs-label{color:#8b1a1a}
+/* 解説パネル */
+.detail-area{margin-bottom:1rem}
+.detail-panel{display:none;border-radius:10px;padding:1.1rem 1.2rem;margin-bottom:.8rem;border-left:4px solid #ccc}
+.detail-panel.show{display:block}
+.detail-panel.dp-low{background:#f2faea;border-color:#5aaa1a}
+.detail-panel.dp-mid{background:#fffbf0;border-color:#e6a817}
+.detail-panel.dp-hih{background:#fff5f5;border-color:#e04040}
+.dp-head{font-size:14px;font-weight:700;margin-bottom:8px}
+.dp-low .dp-head{color:#2d6a0a}
+.dp-mid .dp-head{color:#7a4f00}
+.dp-hih .dp-head{color:#8b1a1a}
+.dp-body{font-size:13.5px;color:#333;line-height:1.75}
+.dp-body ul{padding-left:1.2rem;margin-top:6px}
+.dp-body li{margin-bottom:5px}
+.dp-hint{font-size:12px;color:#777;margin-top:.5rem;text-align:center}
+.note-box{background:#fff;border:1px solid #ddd;border-radius:10px;padding:1rem 1.2rem;margin-top:1rem}
+.note-box h3{font-size:14px;font-weight:600;margin-bottom:5px}
+.note-box p{font-size:13px;color:#555;line-height:1.7}
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="hd">
+    <h1>🐱 猫の粗相・マーキング 根本原因プロファイリングシート</h1>
+    <p>全50問を「はい／いいえ」で答えてください。直感でOKです。<br>最後にカテゴリ別リスクスコアと該当する解説が表示されます。</p>
+    <div class="pw"><div class="pb" id="pb"></div></div>
+    <div class="pl" id="pl">0 / 50 問回答済み</div>
+  </div>
+  <div id="qs"></div>
+  <div class="warn" id="warn">まだ回答が少ないです。できるだけ全問答えてから結果を見てください。</div>
+  <div class="ar">
+    <button class="bs" onclick="document.getElementById('app').scrollIntoView({behavior:'smooth'})">先頭に戻る</button>
+    <button class="bm" onclick="showResult()">結果を見る ↓</button>
+  </div>
+
+  <div class="res" id="res">
+    <div class="res-title">📊 あなたの猫の粗相プロファイル</div>
+    <div class="res-sub">カテゴリをタップすると詳しい解説が表示されます。</div>
+    <div class="rg" id="rg"></div>
+    <div class="detail-area" id="detail-area"></div>
+    <div class="note-box">
+      <h3>💡 このシートの使い方</h3>
+      <p>「リスク高」「要注意」のカテゴリをタップして解説を読み、<strong>一番心当たりがある改善策を1つだけ</strong>今週試してみてください。複数を同時に変えるとどれが効いたかわからなくなります。1週間様子を観察して記録しましょう。</p>
+    </div>
+  </div>
+</div>
+
+<script>
+var CATS=[
+  {id:"env", icon:"🚽", title:"カテゴリ1：排泄環境（物理）",  desc:"トイレの構造・砂・設置場所の盲点"},
+  {id:"time",icon:"🕐", title:"カテゴリ2：行動タイムライン",   desc:"粗相の時間・直前の動き・量からのサイン"},
+  {id:"rel", icon:"🐱", title:"カテゴリ3：多頭関係と動線",    desc:"視線のプレッシャーや縄張り衝突"},
+  {id:"cln", icon:"🧹", title:"カテゴリ4：対策と掃除",        desc:"ニオイの残り・洗剤・対策の落とし穴"},
+  {id:"lif", icon:"🏠", title:"カテゴリ5：生活環境の変化",    desc:"人間の変化が猫の縄張り意識に与える影響"}
+];
+
+var QS=[
+  {id:1,cat:"env",risk:0,text:"トイレの数は「猫の頭数＋1」個以上、別々の場所に分散して設置されていますか？"},
+  {id:2,cat:"env",risk:0,text:"猫砂は、猫が本能的に最も好む細かい「鉱物系（ベントナイト）」を使用していますか？"},
+  {id:3,cat:"env",risk:0,text:"トイレの容器は、猫の体長の1.5倍以上の広さ（目安50cm以上）がありますか？"},
+  {id:4,cat:"env",risk:0,text:"トイレはドーム型（屋根付き）ではなく、周囲の気配を感じ取れるオープン型ですか？"},
+  {id:5,cat:"env",risk:1,text:"トイレのすぐ横（1メートル以内）に、ご飯の器や水飲み場を置いていませんか？"},
+  {id:6,cat:"env",risk:1,text:"人間にとって便利な「システムトイレ（チップとシート）」をメインに使っていますか？"},
+  {id:7,cat:"env",risk:0,text:"猫砂に「ヒノキ」や「せっけん」など、人間用の強い香料がついていませんか？"},
+  {id:8,cat:"env",risk:1,text:"トイレの入り口に、跨ぐのが大変そうな高い段差（10cm以上）がありますか？"},
+  {id:9,cat:"env",risk:0,text:"砂の深さは、猫が底をさらわずにしっかり掘れる「5cm以上」を維持していますか？"},
+  {id:10,cat:"env",risk:1,text:"トイレを設置している場所は、洗濯機や乾燥機の音が響く「騒がしい場所」ではありませんか？"},
+  {id:11,cat:"time",risk:0,text:"粗相をする時、猫ちゃんは「座って（しゃがんで）」排泄していますか？"},
+  {id:12,cat:"time",risk:1,text:"壁や家電などの垂直面に向かって「立ったまま」おしっこを噴射していますか？"},
+  {id:13,cat:"time",risk:1,text:"排泄中、または排泄ポーズの最中にしっぽを細かくプルプル震わせていますか？"},
+  {id:14,cat:"time",risk:1,text:"粗相の場所は、いつも同じ特定の場所（特定の角や家具の横など）ですか？"},
+  {id:15,cat:"time",risk:1,text:"トイレに入る際、容器のフチに足をかけて踏ん張る仕草を見せますか？"},
+  {id:16,cat:"time",risk:1,text:"うんちをしながら走り回る、あるいは少しずつ落とす「逃げながらの排泄」をしますか？"},
+  {id:17,cat:"time",risk:1,text:"排泄の直前に、普段とは違う「大きな鳴き声」で鳴くことがありますか？"},
+  {id:18,cat:"time",risk:1,text:"粗相が起きるタイミングは、飼い主さんの「外出前」や「帰宅直後」に偏っていますか？"},
+  {id:19,cat:"time",risk:1,text:"夜中、寝ている間に布団の「足元」など、飼い主さんの匂いが強い場所に粗相をされますか？"},
+  {id:20,cat:"time",risk:1,text:"排泄後、砂をかける動作をせずに、慌ててその場を飛び出していきますか？"},
+  {id:21,cat:"rel",risk:1,text:"トイレに入っている時、他の猫が入り口で待ち伏せしたり、中を覗いたりしますか？"},
+  {id:22,cat:"rel",risk:1,text:"廊下やドア付近で猫同士が鉢合わせた際、どちらかが道を譲るまで見つめ合いますか？"},
+  {id:23,cat:"rel",risk:0,text:"床に降りることなく部屋を一周できるような「垂直方向の移動ルート」はありますか？"},
+  {id:24,cat:"rel",risk:0,text:"他の猫の視線を完全に遮って、1匹だけでリラックスできる「隠れ家」が全頭分ありますか？"},
+  {id:25,cat:"rel",risk:1,text:"ご飯を食べる場所が密集しており、食べている最中に他の猫の気配を気にしていますか？"},
+  {id:26,cat:"rel",risk:1,text:"特定の猫が、他の猫を執拗に追いかけたり、寝ている場所を奪ったりしますか？"},
+  {id:27,cat:"rel",risk:1,text:"粗相をする猫ちゃんが、他の猫の毛づくろい（アログルーミング）を頻繁にしていますか？"},
+  {id:28,cat:"rel",risk:1,text:"窓の外に野良猫（地域猫）が現れたり、その鳴き声が聞こえる環境ですか？"},
+  {id:29,cat:"rel",risk:1,text:"先住猫が以前までお気に入りだった場所を、最近は新入り猫が独占していませんか？"},
+  {id:30,cat:"rel",risk:0,text:"寝室など「特定の猫だけ」が入れる、他の動物に脅かされない聖域（セーフティゾーン）はありますか？"},
+  {id:31,cat:"cln",risk:0,text:"粗相の掃除に、尿のタンパク質を根本から分解する「酵素（エンザイム）」入り洗剤を使っていますか？"},
+  {id:32,cat:"cln",risk:1,text:"アルコールやクエン酸、一般的な除菌スプレーだけで掃除を済ませていませんか？"},
+  {id:33,cat:"cln",risk:0,text:"布団や衣類の洗濯時、40〜50℃のぬるま湯で「酸素系漂白剤」に浸け置きしていますか？"},
+  {id:34,cat:"cln",risk:0,text:"暗い部屋で「365nmのUVライト」を当て、尿の洗い残し（蛍光反応）を確認しましたか？"},
+  {id:35,cat:"cln",risk:0,text:"粗相対策として、布団やソファに「ビニールシート」や「防水カバー」をかけていますか？"},
+  {id:36,cat:"cln",risk:0,text:"粗相された場所に掃除後、そこを「食事（おやつ）の場所」に変えてみたことはありますか？"},
+  {id:37,cat:"cln",risk:1,text:"猫が嫌う「柑橘系」や「フローラル」の強い香りの消臭剤を使っていませんか？"},
+  {id:38,cat:"cln",risk:1,text:"過去に粗相されたクッションや座椅子の「中身（ウレタン等）」を捨てずに使い続けていますか？"},
+  {id:39,cat:"cln",risk:0,text:"粗相された壁に、猫が嫌がる質感の「アルミホイル」や「プラダン」を貼ってガードしましたか？"},
+  {id:40,cat:"cln",risk:1,text:"粗相を見つけた際、大声で叱ったり、鼻を押し付けたりする「バツ」を与えていませんか？"},
+  {id:41,cat:"lif",risk:1,text:"ここ数ヶ月の間に、引越しや大規模な家具の模様替え、リフォームを行いましたか？"},
+  {id:42,cat:"lif",risk:1,text:"飼い主さんの仕事が繁忙期になり、10時間以上お留守番をさせる日が増えましたか？"},
+  {id:43,cat:"lif",risk:1,text:"赤ちゃんの誕生や親戚の里帰りなど、同居する「人間の数」に変化がありましたか？"},
+  {id:44,cat:"lif",risk:1,text:"粗相をする猫ちゃんは、「一歳（性成熟）」を過ぎてから去勢・避妊手術をしましたか？"},
+  {id:45,cat:"lif",risk:1,text:"最近、新しく猫や犬などの動物を家族に迎え入れましたか？"},
+  {id:46,cat:"lif",risk:1,text:"帰宅時や外出時、猫ちゃんに対して過剰な「お別れ」や「お出迎え」をしていませんか？"},
+  {id:47,cat:"lif",risk:1,text:"キッチンで「炊飯器」や「コンロ」など、熱や音、強い匂いを発する家電を新調しましたか？"},
+  {id:48,cat:"lif",risk:0,text:"お留守番中に猫ちゃんが退屈しないよう、一人で遊べる「知育おもちゃ」などを用意していますか？"},
+  {id:49,cat:"lif",risk:1,text:"粗相が始まった時期、猫ちゃんに「食欲不振」や「体重減少」は見られませんでしたか？"},
+  {id:50,cat:"lif",risk:1,text:"飼い主さん自身が、粗相の片付けに対して「イライラ」や「絶望」を猫の前で出していませんか？"}
+];
+
+// ── 全カテゴリ×3レベルの解説 ──
+var EXPLANATIONS={
+  env:{
+    low:{
+      head:"🚽 排泄環境（物理）：良好",
+      body:"トイレの環境は全体的に整っています。猫が安心して使いやすい環境が作れています。今後も以下の点を維持し続けてください。<ul><li>トイレ数は「頭数＋1」を継続する</li><li>砂の深さ5cm以上・全量交換は月1〜2回を目安に</li><li>容器の丸洗いも月1回定期的に行う</li></ul>粗相の原因は他のカテゴリに潜んでいる可能性が高いです。「行動タイムライン」や「多頭関係と動線」のスコアを確認してみましょう。"
+    },
+    mid:{
+      head:"🚽 排泄環境（物理）：要注意",
+      body:"いくつかの物理的な環境に改善の余地があります。猫はトイレに少しでも不満があると、より快適な場所（カーペットや布団）を選びます。<ul><li>トイレの数が足りていない場合、まず1個追加して別の部屋に置いてみる</li><li>ドーム型を使っている場合、屋根を外してオープン型にするだけで改善するケースが多い</li><li>砂が香り付きの場合、無香料の鉱物系（ベントナイト）に切り替える</li><li>砂が浅い（3cm以下）場合、5cm以上に増量する</li></ul>環境の変化は1つずつ行い、1週間様子を見ることが大切です。"
+    },
+    hih:{
+      head:"🚽 排泄環境（物理）：リスク高",
+      body:"トイレの物理的な環境に、粗相の直接的な原因となりうる問題が複数あります。猫は「ここで排泄したくない」という理由を行動で訴えています。<ul><li><strong>最優先：</strong>トイレの数を「頭数＋1」個に増やし、家の別々の場所に置く（2匹なら3個・別室に）</li><li>ドーム型はニオイがこもり猫がストレスを感じやすい。すぐに屋根を取り外す</li><li>システムトイレ（チップ＋シート）は猫の足裏感覚に合わないことが多い。細かい鉱物系砂に変える</li><li>洗濯機の横など騒音のある場所のトイレは、静かな部屋に移動させる</li><li>砂の香料（ヒノキ・石鹸系）は猫にとって不快。完全無香料に変える</li></ul>まず「トイレの増設」と「設置場所の分散」から着手してください。これだけで改善するケースが非常に多いです。"
+    }
+  },
+  time:{
+    low:{
+      head:"🕐 行動タイムライン：良好",
+      body:"粗相の行動パターンから見て、深刻なサインは少ない状態です。排泄姿勢も正常で、マーキング行動の兆候も少ないようです。<ul><li>引き続き正規トイレの使用状況を定期的に確認する</li><li>排泄後に慌てて飛び出す仕草が増えたら、トイレ環境を見直すサイン</li></ul>粗相の原因は行動面以外（掃除の化学的問題や環境変化）にある可能性があります。"
+    },
+    mid:{
+      head:"🕐 行動タイムライン：要注意",
+      body:"粗相の行動パターンにいくつか気になるサインがあります。特定のタイミングや場所への執着が見られる場合、猫が「そこが安全な排泄場所」と学習してしまっている可能性があります。<ul><li>特定の場所への粗相が繰り返されているなら、その場所を物理的にブロックする（アルミホイルを敷くなど）</li><li>外出前・帰宅直後に粗相が起きるなら、分離不安の可能性。出かける前の「儀式的な行動」をなくし、日常的に短い外出を繰り返す</li><li>排泄後に慌てて飛び出す場合、トイレに何らかの不快感がある合図。砂の種類や深さを見直す</li></ul>"
+    },
+    hih:{
+      head:"🕐 行動タイムライン：リスク高",
+      body:"行動パターンに複数の重要なサインが見られます。以下の点を確認してください。<ul><li><strong>垂直面へのスプレー＋しっぽの震え：</strong>これはマーキング行動の典型サイン。縄張りへの強いストレスを示す。去勢・避妊手術が済んでいない場合は獣医師に相談</li><li><strong>特定の場所への繰り返し：</strong>ニオイが残っていることで「ここがトイレ」と学習している。酵素系洗剤での完全除去が急務</li><li><strong>鳴きながら排泄・排泄後に飛び出す：</strong>排泄時の痛みや不快感のサイン。膀胱炎・泌尿器系疾患の可能性があるため、できるだけ早く獣医師に診てもらうことを強く推奨します</li><li>飼い主の帰宅・外出に連動した粗相は分離不安のサイン。1日5分の集中した遊び時間を設けることで改善することがある</li></ul>"
+    }
+  },
+  rel:{
+    low:{
+      head:"🐱 多頭関係と動線：良好",
+      body:"猫同士の関係と生活動線は比較的良好な状態です。縄張りのプレッシャーが粗相の主因である可能性は低いと言えます。<ul><li>引き続き、各猫が「逃げ場」として使える高い場所を確保し続ける</li><li>ご飯は別々の場所で与えることを習慣にする</li></ul>粗相の原因は別のカテゴリ（特に掃除・環境変化）にある可能性が高いです。"
+    },
+    mid:{
+      head:"🐱 多頭関係と動線：要注意",
+      body:"猫同士の関係に、表面上は穏やかに見えても「見えないプレッシャー」が存在している可能性があります。多頭飼いで一見仲良しに見えても、視線・通り道・トイレのタイミングでストレスが蓄積されます。<ul><li>トイレに向かう通り道に他の猫の定位置がある場合、トイレの位置を変える</li><li>食事場所をさらに離す（理想は別の部屋、または視線が届かない位置）</li><li>先住猫だけが入れる「聖域」を1ヶ所作る（子供部屋の棚の上など）</li><li>廊下での「にらみ合い」が頻発する場合、通路にキャットウォークを設けて立体的な動線を確保する</li></ul>"
+    },
+    hih:{
+      head:"🐱 多頭関係と動線：リスク高",
+      body:"多頭飼いの関係性・動線に、粗相の大きな原因となっているストレス要因が複数あります。「仲が悪くないはずなのに」という状況でも、猫同士の見えない緊張は蓄積します。<ul><li><strong>最重要：</strong>トイレ中に他の猫が近づける状況を排除する。トイレをドアの内側など、他の猫が入れない場所に1個設置する</li><li>先住猫が「完全に1匹になれる時間と場所」を毎日作る。他の猫が入れない部屋へのアクセスを1日数時間確保する</li><li>窓からの野良猫の視認がストレスになっている場合、その窓にフィルムを貼るか、猫がその窓に近づけないようにする</li><li>先住猫のお気に入りスポットを新入り猫に奪われているなら、同等の新しい場所（キャットタワー追加など）を用意する</li><li>ご飯は必ず別室・または完全に視線が届かない距離で与える</li></ul>"
+    }
+  },
+  cln:{
+    low:{
+      head:"🧹 対策と掃除：良好",
+      body:"掃除・ニオイ対策は適切に行えています。化学的なニオイの残留が粗相を誘発しているリスクは低い状態です。<ul><li>酵素系洗剤での掃除を継続する</li><li>定期的にUVライトで確認し、見えない汚れをチェックする習慣をつけると◎</li></ul>粗相が続く場合は、物理的な環境（カテゴリ1）や心理的な要因（カテゴリ3・5）を重点的に見直しましょう。"
+    },
+    mid:{
+      head:"🧹 対策と掃除：要注意",
+      body:"掃除方法にいくつか改善点があり、ニオイが残ることで猫が同じ場所に戻り続けている可能性があります。<ul><li>アルコールや市販の除菌スプレーは尿のタンパク質を分解できない。ペット専用の酵素（エンザイム）系洗剤に切り替える</li><li>布製品は洗濯後も繊維の奥にニオイが残ることがある。40〜50℃のお湯＋酸素系漂白剤での浸け置きを試す</li><li>柑橘系・フローラルの強い消臭剤は猫が嫌いな場合が多く、かえってその場所を避けるようになり、粗相場所を移動させるだけになることがある</li><li>叱ることは逆効果。猫は排泄行為と叱られることを結びつけられないため、隠れてするようになるだけ</li></ul>"
+    },
+    hih:{
+      head:"🧹 対策と掃除：リスク高",
+      body:"掃除・ニオイ対策に重大な見落としがある可能性が高く、これが粗相の「繰り返し」の主因になっている可能性があります。<ul><li><strong>最優先：</strong>今すぐ酵素（エンザイム）系洗剤を入手する。猫の尿は乾くと結晶化し、人間の鼻では感じなくても猫には「ここがトイレ」という強烈なマーカーとして残る</li><li>UVライト（365nm）を暗室で当て、光る箇所を全て特定する。思わぬ場所に汚染が広がっていることが多い</li><li>ウレタン入りのクッション・座椅子は内部まで汚染されていることが多く、洗っても除去できない。思い切って捨てることを検討する</li><li>一度粗相された布団は、カバーを洗っても中の綿に残っている可能性がある。防水カバーをかけるか、買い替えを検討</li><li>大声で叱る・鼻を押しつけるなどの罰は即座にやめる。猫のストレスが増し、粗相が悪化するだけ</li></ul>"
+    }
+  },
+  lif:{
+    low:{
+      head:"🏠 生活環境の変化：良好",
+      body:"飼い主の生活環境の変化が粗相のトリガーになっているリスクは低い状態です。猫の生活リズムが安定して保たれていると言えます。<ul><li>引き続き、猫のルーティン（ご飯・遊び・就寝の時間）を一定に保つ</li><li>知育おもちゃや窓辺のバードウォッチングスポットなど、留守番中の刺激を用意しておくとさらに良い</li></ul>"
+    },
+    mid:{
+      head:"🏠 生活環境の変化：要注意",
+      body:"ここ数ヶ月の生活の変化が、猫の縄張り意識や精神的安定に影響を与えている可能性があります。猫は変化にとても敏感です。<ul><li>模様替えや新家具の導入後に粗相が始まった場合、その変化が縄張りの「再マーキング」を促している可能性がある。以前の配置に戻すか、猫のお気に入りアイテム（毛布・おもちゃ）を目立つ場所に置く</li><li>留守番が長い日が増えた場合、1日10〜15分の集中した遊び（じゃらし棒など）を帰宅後に毎日行う</li><li>過剰なお別れ・お出迎えは分離不安を強化する。出かける時は「普通に」出かけ、帰宅時も落ち着いてから構う</li></ul>"
+    },
+    hih:{
+      head:"🏠 生活環境の変化：リスク高",
+      body:"生活環境の変化が猫の精神的ストレスに大きく影響している可能性が高く、粗相の直接的な引き金になっていると考えられます。<ul><li><strong>新しい家族（人・ペット）が加わった場合：</strong>先住猫の生活動線・寝場所・食事場所を変えないことが最重要。新しい存在に先住猫のテリトリーを侵食させない</li><li><strong>引越し・大規模模様替え後：</strong>猫の旧居の匂いがついたアイテム（毛布・服）を意図的に新しい環境に置き、「ここも自分の縄張り」と認識させる</li><li><strong>性成熟後に去勢・避妊をした場合：</strong>マーキング習慣が手術前に定着している可能性がある。環境改善と行動修正を組み合わせる必要がある</li><li>食欲不振や体重減少が粗相と同時期に起きていた場合、ストレス性の疾患が隠れている可能性がある。獣医師への相談を優先してください</li><li>飼い主のイライラ・絶望感は猫に伝わる。猫は「排泄=叱られる」と感じると隠れてするようになる。まず飼い主自身が「これは猫の悩みのサイン」と受け取るマインドセットに切り替えることが改善の第一歩</li></ul>"
+    }
+  }
+};
+
+var answers={};
+var openPanel=null;
+
+function render(){
+  var html="";
+  CATS.forEach(function(c){
+    html+='<div class="ch"><span class="ci">'+c.icon+'</span><div><div class="ct">'+c.title+'</div><div class="cd">'+c.desc+'</div></div></div>';
+    QS.filter(function(q){return q.cat===c.id;}).forEach(function(q){
+      html+='<div class="qc"><span class="qn">Q'+q.id+'</span><span class="qt">'+q.text+'</span>'
+           +'<div class="yn">'
+           +'<button class="yb" id="y'+q.id+'" onclick="ans('+q.id+',true)">はい</button>'
+           +'<button class="nb" id="n'+q.id+'" onclick="ans('+q.id+',false)">いいえ</button>'
+           +'</div></div>';
+    });
+    html+='<div class="gap"></div>';
+  });
+  document.getElementById("qs").innerHTML=html;
+}
+
+function ans(id,val){
+  answers[id]=val;
+  var yEl=document.getElementById("y"+id);
+  var nEl=document.getElementById("n"+id);
+  if(val){
+    yEl.className="yb on";
+    nEl.className="nb";
+  } else {
+    yEl.className="yb";
+    nEl.className="nb on";
+  }
+  var count=Object.keys(answers).length;
+  document.getElementById("pb").style.width=Math.round(count/50*100)+"%";
+  document.getElementById("pl").textContent=count+" / 50 問回答済み";
+}
+
+function calcRisk(catId){
+  var qs=QS.filter(function(q){return q.cat===catId;});
+  var risk=0;
+  qs.forEach(function(q){
+    if(answers[q.id]===undefined)return;
+    if(q.risk===1&&answers[q.id]===true)risk++;
+    if(q.risk===0&&answers[q.id]===false)risk++;
+  });
+  return{risk:risk,total:qs.length};
+}
+
+function riskLevel(score,max){
+  var r=score/max;
+  if(r>=0.6)return"hih";
+  if(r>=0.35)return"mid";
+  return"low";
+}
+
+function toggleDetail(catId){
+  var panel=document.getElementById("dp-"+catId);
+  if(!panel)return;
+  if(panel.classList.contains("show")){
+    panel.classList.remove("show");
+    var card=document.getElementById("card-"+catId);
+    if(card)card.classList.remove("active");
+    openPanel=null;
+  } else {
+    // 他を閉じる
+    CATS.forEach(function(c){
+      var p=document.getElementById("dp-"+c.id);
+      if(p)p.classList.remove("show");
+      var cd=document.getElementById("card-"+c.id);
+      if(cd)cd.classList.remove("active");
+    });
+    panel.classList.add("show");
+    var card=document.getElementById("card-"+catId);
+    if(card)card.classList.add("active");
+    openPanel=catId;
+    setTimeout(function(){panel.scrollIntoView({behavior:"smooth",block:"nearest"});},100);
+  }
+}
+
+function showResult(){
+  if(Object.keys(answers).length<40){
+    var w=document.getElementById("warn");
+    w.className="warn show";
+    w.scrollIntoView({behavior:"smooth"});
+    return;
+  }
+  document.getElementById("warn").className="warn";
+  var res=document.getElementById("res");
+  res.className="res show";
+  res.scrollIntoView({behavior:"smooth"});
+
+  var catLabels={env:"排泄環境",time:"行動タイムライン",rel:"多頭関係と動線",cln:"対策と掃除",lif:"生活環境の変化"};
+  var rgHtml="";
+  var daHtml="";
+
+  CATS.forEach(function(c){
+    var s=calcRisk(c.id);
+    var lv=riskLevel(s.risk,s.total);
+    var cls=lv==="hih"?"hih":lv==="mid"?"mid":"low";
+    var lbl=lv==="hih"?"リスク高":lv==="mid"?"要注意":"良好";
+
+    rgHtml+='<div class="rc '+cls+'" id="card-'+c.id+'" onclick="toggleDetail(\''+c.id+'\')">'
+      +'<div class="rl">'+c.icon+' '+catLabels[c.id]+'</div>'
+      +'<div class="rn">'+s.risk+'<span class="rm"> / '+s.total+'</span></div>'
+      +'<div class="rs-label">'+lbl+' ▾</div>'
+      +'</div>';
+
+    var ex=EXPLANATIONS[c.id][lv];
+    daHtml+='<div class="detail-panel dp-'+cls+'" id="dp-'+c.id+'">'
+      +'<div class="dp-head">'+ex.head+'</div>'
+      +'<div class="dp-body">'+ex.body+'</div>'
+      +'</div>';
+  });
+
+  document.getElementById("rg").innerHTML=rgHtml;
+  document.getElementById("detail-area").innerHTML=daHtml+'<div class="dp-hint">↑ カードをもう一度タップすると閉じます</div>';
+}
+
+render();
+</script>
+</body>
+</html>
